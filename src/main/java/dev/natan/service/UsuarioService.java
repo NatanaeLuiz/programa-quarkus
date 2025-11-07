@@ -5,24 +5,32 @@ import java.util.UUID;
 
 import dev.natan.exception.UsuarioNotFoundException;
 import dev.natan.model.Usuario;
+import dev.natan.repository.UsuarioRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class UsuarioService {
     
+    private final UsuarioRepository userRepository;
+
+    
+    public UsuarioService(UsuarioRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public Usuario createUser(Usuario usuario) {
-        Usuario.persist(usuario);
+        userRepository.persist(usuario);
         return usuario;
     }
 
     public List<Usuario> findAll(Integer page, Integer size) {
-       return Usuario.findAll()
+       return userRepository.findAll()
                     .page(page, size)
                     .list();
     }
 
     public Usuario findById(UUID userID) {
-        return (Usuario) Usuario.findByIdOptional(userID)
+        return (Usuario) userRepository.findByIdOptional(userID)
                 .orElseThrow(UsuarioNotFoundException::new);
     }
 
@@ -30,9 +38,9 @@ public class UsuarioService {
         
         var usuarioBanco = findById(userID);
 
-        usuarioBanco.username = usuarioAlterado.username;
+        usuarioBanco.setUsername(usuarioAlterado.getUsername());
 
-        Usuario.persist(usuarioBanco);
+        userRepository.persist(usuarioBanco);
         return null;
     }
 
@@ -40,6 +48,6 @@ public class UsuarioService {
 
         var usuarioBanco = findById(userID);
 
-        Usuario.deleteById(usuarioBanco.userId);
+        userRepository.deleteById(usuarioBanco.getUserId());
     }
 }
